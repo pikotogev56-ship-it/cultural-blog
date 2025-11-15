@@ -175,3 +175,115 @@
     }
   }
 }
+
+/* Import Google Fonts for Arabic support */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Playfair+Display:wght@700&display=swap');
+
+/* Custom styles for blog */
+body {
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+}
+
+/* Marquee animation */
+.marquee {
+  display: flex;
+  overflow: hidden;
+  background: linear-gradient(90deg, #0066cc, #003d99);
+  padding: 0.75rem 0;
+  white-space: nowrap;
+}
+
+.marquee-content {
+  display: flex;
+  animation: scroll 20s linear infinite;
+  gap: 2rem;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-content:hover {
+  animation-play-state: paused;
+}
+
+.marquee-item {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+  flex-shrink: 0;
+}
+
+/* Article card styles */
+.article-card {
+  @apply bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow;
+}
+
+.article-card:hover {
+  @apply shadow-lg;
+}
+
+.article-image {
+  @apply w-full h-48 object-cover;
+}
+
+.article-content {
+  @apply p-4;
+}
+
+.article-title {
+  @apply text-lg font-bold text-gray-900 mb-2;
+}
+
+.article-excerpt {
+  @apply text-sm text-gray-600 mb-3;
+}
+
+.article-meta {
+  @apply text-xs text-gray-500 flex gap-2;
+}
+
+/* Navigation styles */
+.nav-link {
+  @apply text-gray-700 hover:text-blue-600 transition-colors;
+}
+
+.nav-link.active {
+  @apply text-blue-600 font-bold border-b-2 border-blue-600;
+}
+
+/* Social links */
+.social-link {
+  @apply inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors;
+}
+
+/* Footer */
+.footer {
+  @apply bg-gray-900 text-white py-8 mt-12;
+}
+
+.footer-text {
+  @apply text-center text-sm;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .marquee-item {
+    font-size: 1rem;
+  }
+
+  .article-image {
+    @apply h-32;
+  }
+}

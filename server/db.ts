@@ -1,7 +1,18 @@
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
-import { ENV } from './_core/env';
+import {
+  InsertUser,
+  users,
+  articles,
+  categories,
+  quotes,
+  menuItems,
+  siteSettings,
+  comments,
+  tags,
+  articleTags,
+} from "../drizzle/schema";
+import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -56,8 +67,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       values.role = user.role;
       updateSet.role = user.role;
     } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
+      values.role = "admin";
+      updateSet.role = "admin";
     }
 
     if (!values.lastSignedIn) {
@@ -84,9 +95,146 @@ export async function getUserByOpenId(openId: string) {
     return undefined;
   }
 
-  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.openId, openId))
+    .limit(1);
 
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// Article queries
+export async function getRecentArticles(limit: number = 10) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(articles)
+    .where(eq(articles.isPublished, true))
+    .orderBy(desc(articles.publishedAt))
+    .limit(limit);
+}
+
+export async function getArticleBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db
+    .select()
+    .from(articles)
+    .where(eq(articles.slug, slug))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function getArticlesByCategory(categoryId: number, limit: number = 10) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(articles)
+    .where(eq(articles.categoryId, categoryId))
+    .orderBy(desc(articles.publishedAt))
+    .limit(limit);
+}
+
+// Category queries
+export async function getAllCategories() {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(categories).orderBy(categories.order);
+}
+
+export async function getCategoryBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db
+    .select()
+    .from(categories)
+    .where(eq(categories.slug, slug))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : null;
+}
+
+// Quote queries
+export async function getRandomQuotes(limit: number = 5) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(quotes)
+    .where(eq(quotes.isPublished, true))
+    .orderBy(quotes.order)
+    .limit(limit);
+}
+
+// Menu queries
+export async function getMenuItems() {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(menuItems)
+    .where(eq(menuItems.isActive, true))
+    .orderBy(menuItems.order);
+}
+
+// Settings queries
+export async function getSetting(key: string) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db
+    .select()
+    .from(siteSettings)
+    .where(eq(siteSettings.key, key))
+    .limit(1);
+
+  return result.length > 0 ? result[0].value : null;
+}
+
+export async function getAllSettings() {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(siteSettings);
+}
+
+// Comment queries
+export async function getArticleComments(articleId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(comments)
+    .where(eq(comments.articleId, articleId))
+    .orderBy(desc(comments.createdAt));
+}
+
+// Tag queries
+export async function getAllTags() {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(tags);
+}
+
+export async function getArticleTags(articleId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(articleTags)
+    .where(eq(articleTags.articleId, articleId));
+}
