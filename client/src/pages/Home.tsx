@@ -8,6 +8,7 @@ import {
   Menu,
   X,
   ChevronRight,
+  ChevronDown,
 } from "lucide-react";
 import {
   APP_LOGO,
@@ -16,6 +17,7 @@ import {
   MARQUEE_TEXT,
   SOCIAL_LINKS,
   FOOTER_TEXT,
+  THEME_COLORS,
   getLoginUrl,
 } from "@/const";
 import { useState } from "react";
@@ -24,6 +26,7 @@ import { Link } from "wouter";
 export default function Home() {
   const { user, loading, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [homeDropdownOpen, setHomeDropdownOpen] = useState(false);
   const [duplicatedMarquee] = useState([...MARQUEE_TEXT, ...MARQUEE_TEXT]);
 
   // Sample articles data (will be replaced with real data from API)
@@ -33,7 +36,7 @@ export default function Home() {
       title: "أهمية القراءة في حياتنا",
       excerpt: "القراءة هي نافذة على العالم وطريق نحو المعرفة والثقافة...",
       category: "مقالات متفرقة",
-      image: "https://placehold.co/300x200/0066cc/ffffff?text=Article1",
+      image: "https://placehold.co/300x200/5B9BD5/ffffff?text=Article1",
       date: "2024-11-16",
     },
     {
@@ -41,7 +44,7 @@ export default function Home() {
       title: "الصحة النفسية والعافية",
       excerpt: "الصحة النفسية جزء أساسي من صحتنا العامة وسعادتنا...",
       category: "معلومات طبية",
-      image: "https://placehold.co/300x200/0066cc/ffffff?text=Article2",
+      image: "https://placehold.co/300x200/5B9BD5/ffffff?text=Article2",
       date: "2024-11-15",
     },
     {
@@ -49,15 +52,15 @@ export default function Home() {
       title: "سيرة الإمام الشافعي",
       excerpt: "حياة عالم من أعظم علماء الإسلام وأثره على الفقه الإسلامي...",
       category: "سيرة وتاريخ",
-      image: "https://placehold.co/300x200/0066cc/ffffff?text=Article3",
+      image: "https://placehold.co/300x200/5B9BD5/ffffff?text=Article3",
       date: "2024-11-14",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: THEME_COLORS.background }}>
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <header className="border-b border-gray-300 sticky top-0 z-50" style={{ backgroundColor: THEME_COLORS.headerBg }}>
         <div className="container mx-auto px-4">
           {/* Top bar with logo and social links */}
           <div className="py-4 flex items-center justify-between">
@@ -69,7 +72,9 @@ export default function Home() {
                 className="w-12 h-12 rounded-full"
               />
               <div>
-                <h1 className="text-2xl font-bold text-blue-600">{APP_TITLE}</h1>
+                <h1 className="text-2xl font-bold" style={{ color: THEME_COLORS.primary }}>
+                  {APP_TITLE}
+                </h1>
                 <p className="text-xs text-gray-600">
                   مدونة ثقافية وتعليمية
                 </p>
@@ -115,7 +120,8 @@ export default function Home() {
                 <Button
                   onClick={() => (window.location.href = getLoginUrl())}
                   size="sm"
-                  className="ml-2"
+                  style={{ backgroundColor: THEME_COLORS.primary }}
+                  className="ml-2 text-white hover:opacity-90"
                 >
                   دخول
                 </Button>
@@ -132,13 +138,43 @@ export default function Home() {
           </div>
 
           {/* Navigation bar */}
-          <nav className="border-t border-gray-200 py-3">
+          <nav className="border-t border-gray-300 py-3">
             <div className="flex flex-wrap gap-2 md:gap-6 text-sm md:text-base overflow-x-auto pb-2">
-              {CATEGORIES.map((category) => (
+              {/* Home dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setHomeDropdownOpen(!homeDropdownOpen)}
+                  className="nav-link whitespace-nowrap flex items-center gap-1"
+                  style={{ color: THEME_COLORS.text }}
+                >
+                  الرئيسية
+                  <ChevronDown size={16} />
+                </button>
+
+                {/* Dropdown menu */}
+                {homeDropdownOpen && (
+                  <div className="dropdown-menu">
+                    {CATEGORIES.map((category) => (
+                      <Link
+                        key={category.id}
+                        href={`/category/${category.slug}`}
+                        onClick={() => setHomeDropdownOpen(false)}
+                        className="block px-4 py-2 text-gray-700 hover:bg-blue-50 transition-colors"
+                      >
+                        {category.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Other categories (non-home) */}
+              {CATEGORIES.filter((cat) => cat.slug !== "home").map((category) => (
                 <Link
                   key={category.id}
                   href={`/category/${category.slug}`}
                   className="nav-link whitespace-nowrap"
+                  style={{ color: THEME_COLORS.text }}
                 >
                   {category.name}
                 </Link>
@@ -149,7 +185,7 @@ export default function Home() {
 
         {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 bg-gray-50 p-4">
+          <div className="md:hidden border-t border-gray-300 bg-gray-50 p-4">
             <div className="flex flex-col gap-3">
               <a
                 href={SOCIAL_LINKS.facebook}
@@ -183,6 +219,7 @@ export default function Home() {
                 <Button
                   onClick={() => (window.location.href = getLoginUrl())}
                   className="w-full"
+                  style={{ backgroundColor: THEME_COLORS.primary }}
                 >
                   دخول
                 </Button>
@@ -207,7 +244,12 @@ export default function Home() {
       <main className="flex-1 container mx-auto px-4 py-8">
         {/* Welcome section */}
         <section className="mb-12">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg p-8 md:p-12">
+          <div
+            className="text-white rounded-lg p-8 md:p-12"
+            style={{
+              background: `linear-gradient(135deg, ${THEME_COLORS.primary} 0%, ${THEME_COLORS.accent} 100%)`,
+            }}
+          >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               أهلاً وسهلاً بك في مدونتنا
             </h2>
@@ -224,7 +266,8 @@ export default function Home() {
             ) : (
               <Button
                 onClick={() => (window.location.href = getLoginUrl())}
-                className="bg-white text-blue-600 hover:bg-gray-100"
+                className="bg-white hover:bg-gray-100"
+                style={{ color: THEME_COLORS.primary }}
               >
                 ابدأ الآن
               </Button>
@@ -235,17 +278,17 @@ export default function Home() {
         {/* Articles section */}
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+            <h2 className="text-2xl md:text-3xl font-bold" style={{ color: THEME_COLORS.text }}>
               آخر المقالات
             </h2>
-            <Link href="/articles" className="text-blue-600 hover:text-blue-800">
+            <Link href="/articles" style={{ color: THEME_COLORS.primary }} className="hover:opacity-80">
               عرض الكل <ChevronRight className="inline" size={20} />
             </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {recentArticles.map((article) => (
-              <Card key={article.id} className="article-card">
+              <Card key={article.id} className="article-card" style={{ backgroundColor: THEME_COLORS.headerBg }}>
                 <img
                   src={article.image}
                   alt={article.title}
@@ -253,17 +296,20 @@ export default function Home() {
                 />
                 <div className="article-content">
                   <div className="article-meta mb-2">
-                    <span className="text-blue-600 font-semibold">
+                    <span style={{ color: THEME_COLORS.primary }} className="font-semibold">
                       {article.category}
                     </span>
                     <span>•</span>
                     <span>{article.date}</span>
                   </div>
-                  <h3 className="article-title">{article.title}</h3>
+                  <h3 className="article-title" style={{ color: THEME_COLORS.text }}>
+                    {article.title}
+                  </h3>
                   <p className="article-excerpt">{article.excerpt}</p>
                   <Link
                     href={`/article/${article.id}`}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-semibold"
+                    style={{ color: THEME_COLORS.primary }}
+                    className="hover:opacity-80 text-sm font-semibold"
                   >
                     اقرأ المزيد →
                   </Link>
@@ -275,7 +321,7 @@ export default function Home() {
 
         {/* Features section */}
         <section className="mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6" style={{ color: THEME_COLORS.text }}>
             ماذا نقدم
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -285,9 +331,15 @@ export default function Home() {
               { title: "معلومات طبية", icon: "⚕️" },
               { title: "سيرة وتاريخ", icon: "📜" },
             ].map((feature, index) => (
-              <Card key={index} className="p-6 text-center hover:shadow-lg transition">
+              <Card
+                key={index}
+                className="p-6 text-center hover:shadow-lg transition"
+                style={{ backgroundColor: THEME_COLORS.headerBg }}
+              >
                 <div className="text-4xl mb-3">{feature.icon}</div>
-                <h3 className="font-bold text-gray-900">{feature.title}</h3>
+                <h3 className="font-bold" style={{ color: THEME_COLORS.text }}>
+                  {feature.title}
+                </h3>
               </Card>
             ))}
           </div>
@@ -295,7 +347,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="footer">
+      <footer className="footer" style={{ backgroundColor: THEME_COLORS.footerBg }}>
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             {/* About */}
@@ -337,7 +389,8 @@ export default function Home() {
                   href={SOCIAL_LINKS.facebook}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-blue-600 hover:bg-blue-700 p-2 rounded-full"
+                  className="p-2 rounded-full"
+                  style={{ backgroundColor: THEME_COLORS.primary }}
                 >
                   <Facebook size={20} />
                 </a>
@@ -353,7 +406,8 @@ export default function Home() {
                   href={SOCIAL_LINKS.twitter}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-blue-400 hover:bg-blue-500 p-2 rounded-full"
+                  className="p-2 rounded-full"
+                  style={{ backgroundColor: THEME_COLORS.primary }}
                 >
                   <Twitter size={20} />
                 </a>

@@ -31,15 +31,17 @@ export const CATEGORIES = [
 // Marquee text
 export const MARQUEE_TEXT = ["ثقافي", "تعليمي", "إسلامي", "طبي"];
 
-// Color theme
+// Color theme - Soft sky blue and warm gray/brown
 export const THEME_COLORS = {
-  primary: "#0066cc",
-  secondary: "#ffffff",
-  accent: "#003d99",
-  text: "#000000",
-  lightText: "#ffffff",
-  background: "#ffffff",
-  darkBackground: "#f5f5f5",
+  primary: "#5B9BD5", // Soft sky blue
+  secondary: "#f5f1e8", // Warm beige/light brown
+  accent: "#4A7BA7", // Darker sky blue
+  text: "#2c2c2c", // Dark gray
+  lightText: "#ffffff", // White
+  background: "#f5f1e8", // Warm beige background
+  darkBackground: "#e8dfd5", // Darker beige
+  headerBg: "#ffffff", // White header
+  footerBg: "#2c2c2c", // Dark footer
 };
 
 // Footer

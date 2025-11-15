@@ -194,7 +194,7 @@ h1, h2, h3, h4, h5, h6 {
 .marquee {
   display: flex;
   overflow: hidden;
-  background: linear-gradient(90deg, #0066cc, #003d99);
+  background: linear-gradient(90deg, #5B9BD5, #4A7BA7);
   padding: 0.75rem 0;
   white-space: nowrap;
 }
@@ -256,21 +256,38 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Navigation styles */
 .nav-link {
-  @apply text-gray-700 hover:text-blue-600 transition-colors;
+  @apply text-gray-700 hover:text-blue-500 transition-colors;
 }
 
 .nav-link.active {
-  @apply text-blue-600 font-bold border-b-2 border-blue-600;
+  @apply text-blue-500 font-bold border-b-2 border-blue-500;
+}
+
+/* Dropdown menu styles */
+.dropdown-menu {
+  @apply absolute top-full right-0 mt-0 bg-white border border-gray-200 rounded-lg shadow-lg min-w-max z-50;
+}
+
+.dropdown-menu a {
+  @apply block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors;
+}
+
+.dropdown-menu a:first-child {
+  @apply rounded-t-lg;
+}
+
+.dropdown-menu a:last-child {
+  @apply rounded-b-lg;
 }
 
 /* Social links */
 .social-link {
-  @apply inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors;
+  @apply inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors;
 }
 
 /* Footer */
 .footer {
-  @apply bg-gray-900 text-white py-8 mt-12;
+  @apply bg-gray-800 text-white py-8 mt-12;
 }
 
 .footer-text {
