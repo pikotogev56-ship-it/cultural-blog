@@ -8,7 +8,6 @@ import {
   Menu,
   X,
   ChevronRight,
-  ChevronDown,
 } from "lucide-react";
 import {
   APP_LOGO,
@@ -28,6 +27,9 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [homeDropdownOpen, setHomeDropdownOpen] = useState(false);
   const [duplicatedMarquee] = useState([...MARQUEE_TEXT, ...MARQUEE_TEXT]);
+
+  // Get all categories except "الرئيسية" for the dropdown
+  const dropdownCategories = CATEGORIES.filter(cat => cat.slug !== "home");
 
   // Sample articles data (will be replaced with real data from API)
   const recentArticles = [
@@ -139,27 +141,35 @@ export default function Home() {
 
           {/* Navigation bar */}
           <nav className="border-t border-gray-300 py-3">
-            <div className="flex flex-wrap gap-2 md:gap-6 text-sm md:text-base overflow-x-auto pb-2">
-              {/* Home dropdown */}
-              <div className="relative">
+            <div className="flex flex-wrap gap-2 md:gap-6 text-sm md:text-base overflow-x-auto pb-2 relative">
+              {/* Home dropdown - Horizontal */}
+              <div 
+                className="relative group"
+                onMouseEnter={() => setHomeDropdownOpen(true)}
+                onMouseLeave={() => setHomeDropdownOpen(false)}
+              >
                 <button
-                  onClick={() => setHomeDropdownOpen(!homeDropdownOpen)}
-                  className="nav-link whitespace-nowrap flex items-center gap-1"
-                  style={{ color: THEME_COLORS.text }}
+                  className="nav-link whitespace-nowrap py-2 px-3 rounded transition-colors"
+                  style={{ 
+                    color: THEME_COLORS.text,
+                    backgroundColor: homeDropdownOpen ? THEME_COLORS.secondary : 'transparent'
+                  }}
                 >
                   الرئيسية
-                  <ChevronDown size={16} />
                 </button>
 
-                {/* Dropdown menu */}
+                {/* Horizontal Dropdown menu */}
                 {homeDropdownOpen && (
-                  <div className="dropdown-menu">
-                    {CATEGORIES.map((category) => (
+                  <div 
+                    className="absolute top-full right-0 mt-0 bg-white border border-gray-200 rounded-lg shadow-lg flex flex-wrap gap-2 p-3 min-w-max z-50"
+                    style={{ width: 'auto', maxWidth: '600px' }}
+                  >
+                    {dropdownCategories.map((category) => (
                       <Link
                         key={category.id}
                         href={`/category/${category.slug}`}
                         onClick={() => setHomeDropdownOpen(false)}
-                        className="block px-4 py-2 text-gray-700 hover:bg-blue-50 transition-colors"
+                        className="px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors rounded whitespace-nowrap text-sm"
                       >
                         {category.name}
                       </Link>
@@ -168,17 +178,19 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Other categories (non-home) */}
-              {CATEGORIES.filter((cat) => cat.slug !== "home").map((category) => (
-                <Link
-                  key={category.id}
-                  href={`/category/${category.slug}`}
-                  className="nav-link whitespace-nowrap"
-                  style={{ color: THEME_COLORS.text }}
-                >
-                  {category.name}
-                </Link>
-              ))}
+              {/* Other categories (non-home) - shown only on desktop */}
+              <div className="hidden lg:flex gap-2 md:gap-6">
+                {dropdownCategories.map((category) => (
+                  <Link
+                    key={category.id}
+                    href={`/category/${category.slug}`}
+                    className="nav-link whitespace-nowrap"
+                    style={{ color: THEME_COLORS.text }}
+                  >
+                    {category.name}
+                  </Link>
+                ))}
+              </div>
             </div>
           </nav>
         </div>
@@ -186,12 +198,24 @@ export default function Home() {
         {/* Mobile menu */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-gray-300 bg-gray-50 p-4">
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 mb-4">
+              {CATEGORIES.map((category) => (
+                <Link
+                  key={category.id}
+                  href={`/category/${category.slug}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors rounded"
+                >
+                  {category.name}
+                </Link>
+              ))}
+            </div>
+            <div className="border-t border-gray-300 pt-3 flex gap-2 mb-3">
               <a
                 href={SOCIAL_LINKS.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="social-link inline-flex"
+                className="social-link"
               >
                 <Facebook size={20} />
               </a>
@@ -199,7 +223,7 @@ export default function Home() {
                 href={SOCIAL_LINKS.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="social-link inline-flex"
+                className="social-link"
               >
                 <Instagram size={20} />
               </a>
@@ -207,24 +231,24 @@ export default function Home() {
                 href={SOCIAL_LINKS.twitter}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="social-link inline-flex"
+                className="social-link"
               >
                 <Twitter size={20} />
               </a>
-              {user ? (
-                <Button onClick={logout} variant="outline" className="w-full">
-                  تسجيل الخروج
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => (window.location.href = getLoginUrl())}
-                  className="w-full"
-                  style={{ backgroundColor: THEME_COLORS.primary }}
-                >
-                  دخول
-                </Button>
-              )}
             </div>
+            {user ? (
+              <Button onClick={logout} variant="outline" className="w-full">
+                تسجيل الخروج
+              </Button>
+            ) : (
+              <Button
+                onClick={() => (window.location.href = getLoginUrl())}
+                className="w-full"
+                style={{ backgroundColor: THEME_COLORS.primary }}
+              >
+                دخول
+              </Button>
+            )}
           </div>
         )}
       </header>

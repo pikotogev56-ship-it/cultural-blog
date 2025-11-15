@@ -6,7 +6,7 @@ export const APP_LOGO = import.meta.env.VITE_APP_LOGO || "https://placehold.co/1
 
 // Site configuration
 export const SITE_NAME = "معتز العلقمي";
-export const SITE_DESCRIPTION = "مدونة ثقافية وتعليمية متخصصة في نشر المحتوى الثقافي والتعليمي والإسلامي والطبي";
+export const SITE_DESCRIPTION = "مدونة متخصصة في نشر المحتوى الثقافي والتعليمي والإسلامي والطبي";
 export const SITE_AUTHOR = "معتز العلقمي";
 
 // Social media links
