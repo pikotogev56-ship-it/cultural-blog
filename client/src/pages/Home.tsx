@@ -78,7 +78,7 @@ export default function Home() {
                   {APP_TITLE}
                 </h1>
                 <p className="text-xs text-gray-600">
-                  مدونة ثقافية وتعليمية
+                  معتز العلقمي
                 </p>
               </div>
             </div>
