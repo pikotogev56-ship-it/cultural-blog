@@ -45,6 +45,15 @@ export const appRouter = router({
 
   // Blog content procedures
   articles: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user?.role !== "admin") {
+        throw new Error("Unauthorized");
+      }
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+      return await db.select().from(articles).orderBy(desc(articles.createdAt));
+    }),
+
     getRecent: publicProcedure
       .input(z.object({ limit: z.number().default(10) }))
       .query(async ({ input }) => {
@@ -72,7 +81,7 @@ export const appRouter = router({
           excerpt: z.string().optional(),
           categoryId: z.number().optional(),
           featuredImage: z.string().optional(),
-          isPublished: z.boolean().default(false),
+          isPublished: z.boolean().default(true),
         })
       )
       .mutation(async ({ input, ctx }) => {
@@ -97,6 +106,7 @@ export const appRouter = router({
         z.object({
           id: z.number(),
           title: z.string().optional(),
+          slug: z.string().optional(),
           content: z.string().optional(),
           excerpt: z.string().optional(),
           categoryId: z.number().optional(),
@@ -138,6 +148,15 @@ export const appRouter = router({
   }),
 
   categories: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user?.role !== "admin") {
+        throw new Error("Unauthorized");
+      }
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+      return await db.select().from(categories).orderBy(desc(categories.createdAt));
+    }),
+
     getAll: publicProcedure.query(async () => {
       return await getAllCategories();
     }),
@@ -174,6 +193,7 @@ export const appRouter = router({
         z.object({
           id: z.number(),
           name: z.string().optional(),
+          slug: z.string().optional(),
           description: z.string().optional(),
           color: z.string().optional(),
         })
@@ -195,6 +215,15 @@ export const appRouter = router({
   }),
 
   quotes: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user?.role !== "admin") {
+        throw new Error("Unauthorized");
+      }
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+      return await db.select().from(quotes).orderBy(desc(quotes.createdAt));
+    }),
+
     getRandom: publicProcedure
       .input(z.object({ limit: z.number().default(5) }))
       .query(async ({ input }) => {

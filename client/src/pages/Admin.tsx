@@ -10,15 +10,16 @@ import {
   Edit2,
   Trash2,
   Settings,
-  Home,
   LogOut,
 } from "lucide-react";
 import { THEME_COLORS } from "@/const";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 import ArticleEditor from "@/components/ArticleEditor";
-import QuoteForm from "@/components/QuoteForm";
-import CategoryForm from "@/components/CategoryForm";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
-type AdminTab = "dashboard" | "articles" | "categories" | "quotes" | "settings";
+type AdminTab = "articles" | "categories" | "quotes" | "settings";
 
 export default function Admin() {
   const { user, logout } = useAuth();
@@ -26,8 +27,6 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState<AdminTab>("articles");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showArticleEditor, setShowArticleEditor] = useState(false);
-  const [showQuoteForm, setShowQuoteForm] = useState(false);
-  const [showCategoryForm, setShowCategoryForm] = useState(false);
 
   // Redirect to login if not authenticated or not admin
   useEffect(() => {
@@ -48,10 +47,10 @@ export default function Admin() {
   };
 
   const sidebarItems = [
-    { id: "articles", label: "إدارة المقالات", icon: Home },
-    { id: "categories", label: "إدارة الأقسام", icon: Menu },
-    { id: "quotes", label: "إدارة الاقتباسات", icon: Edit2 },
-    { id: "settings", label: "الإعدادات", icon: Settings },
+    { id: "articles", label: "إدارة المقالات", icon: "📝" },
+    { id: "categories", label: "إدارة الأقسام", icon: "📂" },
+    { id: "quotes", label: "إدارة الاقتباسات", icon: "💬" },
+    { id: "settings", label: "الإعدادات", icon: "⚙️" },
   ];
 
   return (
@@ -80,26 +79,23 @@ export default function Admin() {
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-2">
-          {sidebarItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id as AdminTab)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded transition ${
-                  activeTab === item.id
-                    ? "text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-                style={{
-                  backgroundColor: activeTab === item.id ? THEME_COLORS.primary : "transparent",
-                }}
-              >
-                <Icon size={20} />
-                {sidebarOpen && <span>{item.label}</span>}
-              </button>
-            );
-          })}
+          {sidebarItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id as AdminTab)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded transition ${
+                activeTab === item.id
+                  ? "text-white"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+              style={{
+                backgroundColor: activeTab === item.id ? THEME_COLORS.primary : "transparent",
+              }}
+            >
+              <span className="text-xl">{item.icon}</span>
+              {sidebarOpen && <span>{item.label}</span>}
+            </button>
+          ))}
         </nav>
 
         {/* User Info */}
@@ -129,263 +125,397 @@ export default function Admin() {
         <div className="p-8 max-w-6xl mx-auto">
           {/* Articles Tab */}
           {activeTab === "articles" && (
-            <div>
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-3xl font-bold" style={{ color: THEME_COLORS.text }}>
-                  إدارة المقالات
-                </h2>
-                <Button
-                  onClick={() => setShowArticleEditor(true)}
-                  style={{ backgroundColor: THEME_COLORS.primary }}
-                  className="text-white hover:opacity-90 flex items-center gap-2"
-                >
-                  <Plus size={20} />
-                  مقالة جديدة
-                </Button>
-              </div>
-
-              <div className="space-y-4">
-                <Card className="p-6" style={{ backgroundColor: THEME_COLORS.headerBg }}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-bold text-lg" style={{ color: THEME_COLORS.text }}>
-                        أهمية القراءة في حياتنا
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1">القسم: مقالات متفرقة</p>
-                      <p className="text-xs text-gray-500 mt-1">2024-11-16</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline">
-                        <Edit2 size={16} />
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <Trash2 size={16} />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-
-                <Card className="p-6" style={{ backgroundColor: THEME_COLORS.headerBg }}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-bold text-lg" style={{ color: THEME_COLORS.text }}>
-                        الحضارة الإسلامية والعلوم
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1">القسم: سيرة وتاريخ</p>
-                      <p className="text-xs text-gray-500 mt-1">2024-11-15</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline">
-                        <Edit2 size={16} />
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <Trash2 size={16} />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            </div>
+            <ArticlesTab
+              onShowEditor={() => setShowArticleEditor(true)}
+              showEditor={showArticleEditor}
+              onCloseEditor={() => setShowArticleEditor(false)}
+            />
           )}
 
           {/* Categories Tab */}
-          {activeTab === "categories" && (
-            <div>
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-3xl font-bold" style={{ color: THEME_COLORS.text }}>
-                  إدارة الأقسام
-                </h2>
-                <Button
-                  onClick={() => setShowCategoryForm(true)}
-                  style={{ backgroundColor: THEME_COLORS.primary }}
-                  className="text-white hover:opacity-90 flex items-center gap-2"
-                >
-                  <Plus size={20} />
-                  قسم جديد
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  { name: "مقالات متفرقة", count: 1, icon: "📚" },
-                  { name: "من بطون الكتب", count: 2, icon: "📖" },
-                  { name: "سيرة وتاريخ", count: 1, icon: "📜" },
-                  { name: "معلومات طبية", count: 0, icon: "⚕️" },
-                ].map((cat, idx) => (
-                  <Card key={idx} className="p-6" style={{ backgroundColor: THEME_COLORS.headerBg }}>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="text-3xl mb-2">{cat.icon}</div>
-                        <h3 className="font-bold text-lg" style={{ color: THEME_COLORS.text }}>
-                          {cat.name}
-                        </h3>
-                        <p className="text-sm text-gray-600 mt-1">{cat.count} مقالة</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline">
-                          <Edit2 size={16} />
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Trash2 size={16} />
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
+          {activeTab === "categories" && <CategoriesTab />}
 
           {/* Quotes Tab */}
-          {activeTab === "quotes" && (
-            <div>
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-3xl font-bold" style={{ color: THEME_COLORS.text }}>
-                  إدارة الاقتباسات
-                </h2>
-                <Button
-                  onClick={() => setShowQuoteForm(true)}
-                  style={{ backgroundColor: THEME_COLORS.primary }}
-                  className="text-white hover:opacity-90 flex items-center gap-2"
-                >
-                  <Plus size={20} />
-                  اقتباس جديد
-                </Button>
-              </div>
-
-              <div className="space-y-4">
-                {[
-                  { text: "العلم نور والجهل ظلام", author: "الإمام الشافعي" },
-                  { text: "الوقت هو أثمن ما يملكه الإنسان", author: "الحكماء" },
-                ].map((quote, idx) => (
-                  <Card key={idx} className="p-6" style={{ backgroundColor: THEME_COLORS.headerBg }}>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className="italic text-lg" style={{ color: THEME_COLORS.text }}>
-                          "{quote.text}"
-                        </p>
-                        <p className="text-sm text-gray-600 mt-2">— {quote.author}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline">
-                          <Edit2 size={16} />
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Trash2 size={16} />
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
+          {activeTab === "quotes" && <QuotesTab />}
 
           {/* Settings Tab */}
-          {activeTab === "settings" && (
-            <div>
-              <h2 className="text-3xl font-bold mb-8" style={{ color: THEME_COLORS.text }}>
-                الإعدادات
-              </h2>
-
-              <div className="space-y-6 max-w-2xl">
-                <Card className="p-6" style={{ backgroundColor: THEME_COLORS.headerBg }}>
-                  <h3 className="font-bold text-lg mb-4" style={{ color: THEME_COLORS.text }}>
-                    الألوان
-                  </h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-semibold mb-2">
-                        اللون الأساسي
-                      </label>
-                      <div className="flex gap-2">
-                        <input
-                          type="color"
-                          defaultValue={THEME_COLORS.primary}
-                          className="w-12 h-12 rounded cursor-pointer"
-                        />
-                        <input
-                          type="text"
-                          defaultValue={THEME_COLORS.primary}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-
-                <Card className="p-6" style={{ backgroundColor: THEME_COLORS.headerBg }}>
-                  <h3 className="font-bold text-lg mb-4" style={{ color: THEME_COLORS.text }}>
-                    روابط التواصل الاجتماعي
-                  </h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-semibold mb-2">فيسبوك</label>
-                      <input
-                        type="url"
-                        placeholder="https://facebook.com/..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold mb-2">إنستغرام</label>
-                      <input
-                        type="url"
-                        placeholder="https://instagram.com/..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold mb-2">تويتر</label>
-                      <input
-                        type="url"
-                        placeholder="https://twitter.com/..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded"
-                      />
-                    </div>
-                  </div>
-                </Card>
-
-                <Button
-                  style={{ backgroundColor: THEME_COLORS.primary }}
-                  className="text-white hover:opacity-90 w-full"
-                >
-                  حفظ التغييرات
-                </Button>
-              </div>
-            </div>
-          )}
+          {activeTab === "settings" && <SettingsTab />}
         </div>
       </main>
+    </div>
+  );
+}
 
-      {/* Forms */}
-      {showArticleEditor && (
+// Articles Tab Component
+function ArticlesTab({
+  onShowEditor,
+  showEditor,
+  onCloseEditor,
+}: {
+  onShowEditor: () => void;
+  showEditor: boolean;
+  onCloseEditor: () => void;
+}) {
+  const { data: articles, refetch } = trpc.articles.list.useQuery();
+  const { data: categories } = trpc.categories.list.useQuery();
+  const deleteArticle = trpc.articles.delete.useMutation({
+    onSuccess: () => {
+      toast.success("تم حذف المقالة بنجاح!");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`خطأ: ${error.message}`);
+    },
+  });
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-3xl font-bold" style={{ color: THEME_COLORS.text }}>
+          إدارة المقالات
+        </h2>
+        <Button
+          onClick={onShowEditor}
+          style={{ backgroundColor: THEME_COLORS.primary }}
+          className="text-white hover:opacity-90 flex items-center gap-2"
+        >
+          <Plus size={20} />
+          مقالة جديدة
+        </Button>
+      </div>
+
+      {showEditor && (
         <ArticleEditor
-          onClose={() => setShowArticleEditor(false)}
-          onSuccess={() => {
-            setShowArticleEditor(false);
-            // Refresh articles list
-          }}
+          onClose={onCloseEditor}
+          onSuccess={() => refetch()}
         />
       )}
-      {showQuoteForm && (
-        <QuoteForm
-          onClose={() => setShowQuoteForm(false)}
-          onSuccess={() => {
-            setShowQuoteForm(false);
-            // Refresh quotes list
-          }}
-        />
-      )}
-      {showCategoryForm && (
-        <CategoryForm
-          onClose={() => setShowCategoryForm(false)}
-          onSuccess={() => {
-            setShowCategoryForm(false);
-            // Refresh categories list
-          }}
-        />
-      )}
+
+      <div className="space-y-4">
+        {articles && articles.length > 0 ? (
+          articles.map((article: any) => (
+            <Card
+              key={article.id}
+              className="p-6"
+              style={{ backgroundColor: THEME_COLORS.headerBg }}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg" style={{ color: THEME_COLORS.text }}>
+                    {article.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {article.excerpt || "بدون ملخص"}
+                  </p>
+                  <div className="flex gap-4 text-sm text-gray-500 mt-2">
+                    <span>
+                      القسم:{" "}
+                      {categories?.find((c: any) => c.id === article.categoryId)
+                        ?.name || "غير محدد"}
+                    </span>
+                    <span>
+                      {article.isPublished ? "✓ منشور" : "⊘ مسودة"}
+                    </span>
+                    <span>{new Date(article.createdAt).toLocaleDateString("ar-SA")}</span>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => toast.info("قريباً: تحرير المقالة")}
+                  >
+                    <Edit2 size={16} />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      if (confirm("هل أنت متأكد من حذف هذه المقالة؟")) {
+                        deleteArticle.mutate({ id: article.id });
+                      }
+                    }}
+                  >
+                    <Trash2 size={16} className="text-red-500" />
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ))
+        ) : (
+          <Card className="p-6 text-center text-gray-500">
+            لا توجد مقالات حتى الآن
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Categories Tab Component
+function CategoriesTab() {
+  const { data: categories, refetch } = trpc.categories.list.useQuery();
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const createCategory = trpc.categories.create.useMutation({
+    onSuccess: () => {
+      toast.success("تم إنشاء القسم بنجاح!");
+      setNewCategoryName("");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`خطأ: ${error.message}`);
+    },
+  });
+
+  const handleCreateCategory = () => {
+    if (!newCategoryName.trim()) {
+      toast.error("يرجى إدخال اسم القسم");
+      return;
+    }
+
+    const slug = newCategoryName
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]/g, "");
+
+    createCategory.mutate({
+      name: newCategoryName,
+      slug,
+      description: "",
+      color: THEME_COLORS.primary,
+    });
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-3xl font-bold" style={{ color: THEME_COLORS.text }}>
+          إدارة الأقسام
+        </h2>
+      </div>
+
+      {/* Add new category */}
+      <Card className="p-6 mb-8" style={{ backgroundColor: THEME_COLORS.headerBg }}>
+        <h3 className="font-bold text-lg mb-4">إضافة قسم جديد</h3>
+        <div className="flex gap-4">
+          <input
+            type="text"
+            value={newCategoryName}
+            onChange={(e) => setNewCategoryName(e.target.value)}
+            placeholder="اسم القسم"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
+            onKeyPress={(e) => {
+              if (e.key === "Enter") handleCreateCategory();
+            }}
+          />
+          <Button
+            onClick={handleCreateCategory}
+            disabled={createCategory.isPending}
+            style={{ backgroundColor: THEME_COLORS.primary }}
+            className="text-white hover:opacity-90"
+          >
+            إضافة
+          </Button>
+        </div>
+      </Card>
+
+      {/* Categories list */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {categories && categories.length > 0 ? (
+          categories.map((cat: any) => (
+            <Card
+              key={cat.id}
+              className="p-6"
+              style={{ backgroundColor: THEME_COLORS.headerBg }}
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-bold text-lg" style={{ color: THEME_COLORS.text }}>
+                    {cat.name}
+                  </h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {cat.description || "بدون وصف"}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline">
+                    <Edit2 size={16} />
+                  </Button>
+                  <Button size="sm" variant="outline">
+                    <Trash2 size={16} className="text-red-500" />
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ))
+        ) : (
+          <Card className="p-6 col-span-2 text-center text-gray-500">
+            لا توجد أقسام حتى الآن
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Quotes Tab Component
+function QuotesTab() {
+  const { data: quotes, refetch } = trpc.quotes.list.useQuery();
+  const [newQuoteText, setNewQuoteText] = useState("");
+  const [newQuoteAuthor, setNewQuoteAuthor] = useState("");
+  const createQuote = trpc.quotes.create.useMutation({
+    onSuccess: () => {
+      toast.success("تم إضافة الاقتباس بنجاح!");
+      setNewQuoteText("");
+      setNewQuoteAuthor("");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`خطأ: ${error.message}`);
+    },
+  });
+
+  const handleCreateQuote = () => {
+    if (!newQuoteText.trim() || !newQuoteAuthor.trim()) {
+      toast.error("يرجى ملء جميع الحقول");
+      return;
+    }
+
+    createQuote.mutate({
+      text: newQuoteText,
+      author: newQuoteAuthor,
+      source: "",
+      categoryId: 1,
+    });
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-3xl font-bold" style={{ color: THEME_COLORS.text }}>
+          إدارة الاقتباسات
+        </h2>
+      </div>
+
+      {/* Add new quote */}
+      <Card className="p-6 mb-8" style={{ backgroundColor: THEME_COLORS.headerBg }}>
+        <h3 className="font-bold text-lg mb-4">إضافة اقتباس جديد</h3>
+        <div className="space-y-4">
+          <textarea
+            value={newQuoteText}
+            onChange={(e) => setNewQuoteText(e.target.value)}
+            placeholder="نص الاقتباس"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg h-24"
+          />
+          <input
+            type="text"
+            value={newQuoteAuthor}
+            onChange={(e) => setNewQuoteAuthor(e.target.value)}
+            placeholder="اسم المؤلف"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <Button
+            onClick={handleCreateQuote}
+            disabled={createQuote.isPending}
+            style={{ backgroundColor: THEME_COLORS.primary }}
+            className="text-white hover:opacity-90 w-full"
+          >
+            إضافة الاقتباس
+          </Button>
+        </div>
+      </Card>
+
+      {/* Quotes list */}
+      <div className="space-y-4">
+        {quotes && quotes.length > 0 ? (
+          quotes.map((quote: any) => (
+            <Card
+              key={quote.id}
+              className="p-6"
+              style={{ backgroundColor: THEME_COLORS.headerBg }}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className="italic text-lg" style={{ color: THEME_COLORS.text }}>
+                    "{quote.text}"
+                  </p>
+                  <p className="text-sm text-gray-600 mt-2">— {quote.author}</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline">
+                    <Edit2 size={16} />
+                  </Button>
+                  <Button size="sm" variant="outline">
+                    <Trash2 size={16} className="text-red-500" />
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ))
+        ) : (
+          <Card className="p-6 text-center text-gray-500">
+            لا توجد اقتباسات حتى الآن
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Settings Tab Component
+function SettingsTab() {
+  return (
+    <div>
+      <h2 className="text-3xl font-bold mb-8" style={{ color: THEME_COLORS.text }}>
+        الإعدادات
+      </h2>
+
+      <Card className="p-6" style={{ backgroundColor: THEME_COLORS.headerBg }}>
+        <div className="space-y-6">
+          <div>
+            <h3 className="font-bold text-lg mb-4">إعدادات الموقع</h3>
+            <p className="text-gray-600">
+              يمكنك تخصيص إعدادات الموقع من خلال لوحة التحكم. هذه الميزة قيد التطوير.
+            </p>
+          </div>
+
+          <div className="border-t border-gray-300 pt-6">
+            <h3 className="font-bold text-lg mb-4">وسائل التواصل الاجتماعي</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold mb-2">
+                  رابط فيسبوك
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://facebook.com/..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-2">
+                  رابط إنستغرام
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://instagram.com/..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-2">
+                  رابط تويتر
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://twitter.com/..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
     </div>
   );
 }
