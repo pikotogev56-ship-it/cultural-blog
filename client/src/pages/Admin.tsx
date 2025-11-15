@@ -14,7 +14,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { THEME_COLORS } from "@/const";
-import ArticleForm from "@/components/ArticleForm";
+import ArticleEditor from "@/components/ArticleEditor";
 import QuoteForm from "@/components/QuoteForm";
 import CategoryForm from "@/components/CategoryForm";
 
@@ -25,7 +25,7 @@ export default function Admin() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<AdminTab>("articles");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [showArticleForm, setShowArticleForm] = useState(false);
+  const [showArticleEditor, setShowArticleEditor] = useState(false);
   const [showQuoteForm, setShowQuoteForm] = useState(false);
   const [showCategoryForm, setShowCategoryForm] = useState(false);
 
@@ -135,7 +135,7 @@ export default function Admin() {
                   إدارة المقالات
                 </h2>
                 <Button
-                  onClick={() => setShowArticleForm(true)}
+                  onClick={() => setShowArticleEditor(true)}
                   style={{ backgroundColor: THEME_COLORS.primary }}
                   className="text-white hover:opacity-90 flex items-center gap-2"
                 >
@@ -359,11 +359,11 @@ export default function Admin() {
       </main>
 
       {/* Forms */}
-      {showArticleForm && (
-        <ArticleForm
-          onClose={() => setShowArticleForm(false)}
+      {showArticleEditor && (
+        <ArticleEditor
+          onClose={() => setShowArticleEditor(false)}
           onSuccess={() => {
-            setShowArticleForm(false);
+            setShowArticleEditor(false);
             // Refresh articles list
           }}
         />
