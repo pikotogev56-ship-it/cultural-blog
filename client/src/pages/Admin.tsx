@@ -17,6 +17,9 @@ import {
   Home,
 } from "lucide-react";
 import { THEME_COLORS } from "@/const";
+import ArticleForm from "@/components/ArticleForm";
+import QuoteForm from "@/components/QuoteForm";
+import CategoryForm from "@/components/CategoryForm";
 
 type AdminTab = "dashboard" | "articles" | "categories" | "quotes" | "settings";
 
@@ -25,6 +28,9 @@ export default function Admin() {
   const [location, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showArticleForm, setShowArticleForm] = useState(false);
+  const [showQuoteForm, setShowQuoteForm] = useState(false);
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
 
   // Redirect to login if not authenticated or not admin
   useEffect(() => {
@@ -211,6 +217,7 @@ export default function Admin() {
                   إدارة المقالات
                 </h2>
                 <Button
+                  onClick={() => setShowArticleForm(true)}
                   style={{ backgroundColor: THEME_COLORS.primary }}
                   className="text-white hover:opacity-90"
                 >
@@ -258,6 +265,7 @@ export default function Admin() {
                   إدارة الأقسام
                 </h2>
                 <Button
+                  onClick={() => setShowCategoryForm(true)}
                   style={{ backgroundColor: THEME_COLORS.primary }}
                   className="text-white hover:opacity-90"
                 >
@@ -304,6 +312,7 @@ export default function Admin() {
                   إدارة الاقتباسات
                 </h2>
                 <Button
+                  onClick={() => setShowQuoteForm(true)}
                   style={{ backgroundColor: THEME_COLORS.primary }}
                   className="text-white hover:opacity-90"
                 >
@@ -474,6 +483,26 @@ export default function Admin() {
           )}
         </div>
       </main>
+
+      {/* Forms */}
+      {showArticleForm && (
+        <ArticleForm
+          onClose={() => setShowArticleForm(false)}
+          onSuccess={() => setShowArticleForm(false)}
+        />
+      )}
+      {showQuoteForm && (
+        <QuoteForm
+          onClose={() => setShowQuoteForm(false)}
+          onSuccess={() => setShowQuoteForm(false)}
+        />
+      )}
+      {showCategoryForm && (
+        <CategoryForm
+          onClose={() => setShowCategoryForm(false)}
+          onSuccess={() => setShowCategoryForm(false)}
+        />
+      )}
     </div>
   );
 }
