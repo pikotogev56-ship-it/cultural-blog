@@ -1,0 +1,28 @@
+version: 1
+project: moataz-space-deploy
+api_key: prj_Y6UfZVs8GPhD09Wm8SRJgwN83fYt
+
+# Build configuration
+build:
+  command: pnpm install && pnpm build
+  output_dir: dist
+
+# Runtime configuration
+runtime:
+  node_version: "22"
+  
+# Environment variables
+env:
+  NODE_ENV: production
+  VITE_APP_TITLE: معتز العلقمي
+  
+# Deployment settings
+deploy:
+  auto_deploy: true
+  branch: main
+  
+# Health check
+health_check:
+  enabled: true
+  path: /
+  interval: 30
